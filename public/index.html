@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gmail Checker Pro</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+      background: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      color: #e2e8f0;
+    }
+
+    .container {
+      background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+      border-radius: 16px;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 1px 1px rgba(255, 255, 255, 0.05);
+      max-width: 700px;
+      width: 100%;
+      padding: 50px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .header {
+      margin-bottom: 40px;
+      text-align: center;
+    }
+
+    .logo {
+      font-size: 40px;
+      margin-bottom: 15px;
+    }
+
+    h1 {
+      color: #f1f5f9;
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #60a5fa 0%, #3b82f6 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .subtitle {
+      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 400;
+    }
+
+    .form-group {
+      margin-bottom: 24px;
+    }
+
+    label {
+      display: block;
+      color: #cbd5e1;
+      font-weight: 600;
+      margin-bottom: 10px;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    input[type="email"],
+    select {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1.5px solid #334155;
+      background: #1e293b;
+      border-radius: 8px;
+      font-size: 14px;
+      color: #f1f5f9;
+      transition: all 0.3s ease;
+    }
+
+    input[type="email"]::placeholder {
+      color: #64748b;
+    }
+
+    input[type="email"]:focus,
+    select:focus {
+      outline: none;
+      border-color: #3b82f6;
+      background: #0f172a;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .form-row .form-group {
+      margin-bottom: 0;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px 20px;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    button:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(59, 130, 246, 0.4);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    .spinner {
+      border: 3px solid #334155;
+      border-top: 3px solid #3b82f6;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 15px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .loading p {
+      color: #94a3b8;
+      font-size: 14px;
+    }
+
+    .alert {
+      padding: 16px 20px;
+      border-radius: 8px;
+      margin-bottom: 24px;
+      font-size: 14px;
+      display: none;
+      border-left: 4px solid;
+    }
+
+    .alert.success {
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+      border-left-color: #22c55e;
+    }
+
+    .alert.error {
+      background: rgba(239, 68, 68, 0.1);
+      color: #fca5a5;
+      border-left-color: #ef4444;
+    }
+
+    .alert.info {
+      background: rgba(59, 130, 246, 0.1);
+      color: #93c5fd;
+      border-left-color: #3b82f6;
+    }
+
+    .results {
+      margin-top: 50px;
+      border-top: 1px solid #334155;
+      padding-top: 30px;
+    }
+
+    .results h2 {
+      color: #f1f5f9;
+      margin-bottom: 24px;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .result-item {
+      background: rgba(30, 41, 59, 0.8);
+      padding: 18px;
+      border-radius: 8px;
+      margin-bottom: 12px;
+      border-left: 4px solid #3b82f6;
+      border: 1px solid #334155;
+      transition: all 0.3s ease;
+    }
+
+    .result-item:hover {
+      background: rgba(30, 41, 59, 1);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    }
+
+    .result-item.success {
+      border-left-color: #22c55e;
+      background: rgba(34, 197, 94, 0.05);
+    }
+
+    .result-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .result-email {
+      font-weight: 600;
+      color: #f1f5f9;
+      font-size: 14px;
+    }
+
+    .result-status {
+      font-size: 11px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      background: #22c55e;
+      color: #064e3b;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .result-password {
+      color: #60a5fa;
+      font-family: 'Courier New', monospace;
+      font-weight: 600;
+      font-size: 12px;
+      margin-bottom: 8px;
+      background: rgba(59, 130, 246, 0.1);
+      padding: 8px 12px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .result-date {
+      color: #64748b;
+      font-size: 12px;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: #64748b;
+      padding: 40px 0;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .button-group button {
+      flex: 1;
+    }
+
+    button.secondary {
+      background: #334155;
+      color: #e2e8f0;
+    }
+
+    button.secondary:hover {
+      background: #475569;
+    }
+
+    .settings-section {
+      margin-top: 50px;
+      border-top: 1px solid #334155;
+      padding-top: 30px;
+    }
+
+    .settings-section h2 {
+      color: #f1f5f9;
+      margin-bottom: 24px;
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      font-weight: 700;
+    }
+
+    .password-input-group {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .password-input-group input {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .password-input-group button {
+      flex: 0 0 auto;
+      width: auto;
+      padding: 14px 24px;
+    }
+
+    .passwords-list {
+      background: rgba(30, 41, 59, 0.5);
+      border: 1px solid #334155;
+      border-radius: 8px;
+      padding: 20px;
+      max-height: 300px;
+      overflow-y: auto;
+      margin-bottom: 20px;
+    }
+
+    .password-tag {
+      display: inline-flex;
+      align-items: center;
+      background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+      color: white;
+      padding: 8px 14px;
+      border-radius: 20px;
+      margin: 6px 6px 6px 0;
+      font-size: 12px;
+      font-family: 'Courier New', monospace;
+      font-weight: 500;
+    }
+
+    .password-tag.default {
+      background: #64748b;
+    }
+
+    .password-tag button {
+      background: none;
+      border: none;
+      color: white;
+      cursor: pointer;
+      padding: 0;
+      margin-left: 10px;
+      font-size: 16px;
+      font-weight: bold;
+      width: auto;
+      transition: opacity 0.2s;
+    }
+
+    .password-tag button:hover {
+      opacity: 0.7;
+    }
+
+    .password-stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .stat {
+      background: rgba(59, 130, 246, 0.1);
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+      border-left: 3px solid #3b82f6;
+    }
+
+    .stat-label {
+      color: #94a3b8;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .stat-value {
+      color: #60a5fa;
+      font-weight: 700;
+      font-size: 24px;
+    }
+
+    .tab-button {
+      padding: 10px 20px !important;
+      background: transparent !important;
+      border: none !important;
+      color: #94a3b8;
+      font-size: 14px !important;
+      font-weight: 600 !important;
+      cursor: pointer !important;
+      border-bottom: 2px solid transparent;
+      transition: all 0.3s ease !important;
+      box-shadow: none !important;
+      text-transform: none !important;
+      letter-spacing: normal !important;
+      width: auto !important;
+      margin: 0 !important;
+    }
+
+    .tab-button:hover {
+      color: #cbd5e1 !important;
+      transform: none !important;
+    }
+
+    .tab-button.active {
+      color: #60a5fa !important;
+      border-bottom-color: #3b82f6 !important;
+    }
+
+    textarea {
+      font-family: 'Courier New', monospace;
+    }
+
+    textarea:focus {
+      border-color: #3b82f6 !important;
+      background: #0f172a !important;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo">🔐</div>
+      <h1>Gmail Checker Pro</h1>
+      <p class="subtitle">Validador de credenciais - Seguro e Rápido</p>
+    </div>
+
+    <div id="alert" class="alert"></div>
+
+    <div style="display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 1px solid #334155; padding-bottom: 20px; justify-content: space-between; align-items: center;">
+      <div style="display: flex; gap: 10px;">
+        <button type="button" id="tabIndividual" class="tab-button active" onclick="switchTab('individual')">📧 Individual</button>
+        <button type="button" id="tabBatch" class="tab-button" onclick="switchTab('batch')">📋 Em Massa</button>
+      </div>
+      <a href="/stats" style="text-decoration: none;">
+        <button type="button" class="tab-button" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%); box-shadow: 0 4px 15px rgba(139, 92, 246, 0.3);">📊 Estatísticas</button>
+      </a>
+    </div>
+
+    <!-- TAB INDIVIDUAL -->
+    <div id="tabIndividualContent">
+      <form id="checkerForm">
+        <div class="form-row">
+          <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" id="email" placeholder="seu@email.com" required>
+          </div>
+          <div class="form-group">
+            <label for="provider">Provider</label>
+            <select id="provider">
+              <option value="gmail">Gmail</option>
+              <option value="outlook">Outlook</option>
+            </select>
+          </div>
+        </div>
+
+        <button type="submit">🔍 Testar Email</button>
+        <button type="button" onclick="diagnose()" style="background: #64748b; margin-top: 10px;">🔧 Diagnóstico</button>
+      </form>
+    </div>
+
+    <!-- TAB BATCH -->
+    <div id="tabBatchContent" style="display: none;">
+      <!-- Botão de importar -->
+      <div class="form-group" style="margin-bottom: 20px;">
+        <label for="emailFile">📂 Importar Emails de Arquivo</label>
+        <div style="display: flex; gap: 10px;">
+          <input type="file" id="emailFile" accept=".txt,.csv" style="flex: 1;">
+          <button type="button" onclick="importEmailsFile()" style="flex: 0 0 auto; padding: 14px 20px;">📤 Importar</button>
+        </div>
+        <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">📋 Formatos aceitos: .txt (um email por linha) ou .csv</p>
+      </div>
+
+      <form id="batchForm">
+        <div class="form-group">
+          <label for="emails">Emails (um por linha)</label>
+          <textarea id="emails" placeholder="email1@gmail.com&#10;email2@gmail.com&#10;email3@gmail.com" style="width: 100%; min-height: 150px; padding: 14px 16px; border: 1.5px solid #334155; background: #1e293b; border-radius: 8px; font-size: 14px; color: #f1f5f9; font-family: monospace; resize: vertical; transition: all 0.3s ease;" required></textarea>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="batchPasswordSelect">Escolher Senha</label>
+            <select id="batchPasswordSelect" style="width: 100%;">
+              <option value="">-- Selecione uma senha --</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="batchProvider">Provider</label>
+            <select id="batchProvider">
+              <option value="gmail">Gmail</option>
+              <option value="outlook">Outlook</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 24px; padding: 12px; background: rgba(59, 130, 246, 0.1); border-radius: 8px; border-left: 3px solid #3b82f6;">
+          <span style="color: #93c5fd; font-size: 13px;">💡 As senhas aparecem aqui automaticamente. Selecione uma para testar todos os emails.</span>
+        </div>
+
+        <button type="submit">⚡ Testar Todos</button>
+      </form>
+
+      <div id="batchProgress" style="display: none; margin-top: 30px;">
+        <div style="margin-bottom: 15px;">
+          <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 12px; color: #94a3b8;">
+            <span>Progresso</span>
+            <span id="progressText">0/0</span>
+          </div>
+          <div style="width: 100%; height: 8px; background: #334155; border-radius: 4px; overflow: hidden;">
+            <div id="progressBar" style="height: 100%; width: 0%; background: linear-gradient(90deg, #3b82f6, #60a5fa); transition: width 0.3s ease;"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="loading" id="loading">
+      <div class="spinner"></div>
+      <p>Testando senhas padrão...</p>
+    </div>
+
+    <div class="results" id="results" style="display: none;">
+      <h2>📊 Resultados</h2>
+      <div id="resultsList"></div>
+      <div class="button-group">
+        <button class="secondary" onclick="loadResults()">🔄 Atualizar</button>
+        <button class="secondary" onclick="clearResults()">🗑️ Limpar Histórico</button>
+      </div>
+    </div>
+
+    <div class="settings-section">
+      <h2>⚙️ Gerenciar Senhas</h2>
+
+      <div class="password-stats">
+        <div class="stat">
+          <div class="stat-label">Senhas Padrão</div>
+          <div class="stat-value" id="defaultCount">15</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Total de Senhas</div>
+          <div class="stat-value" id="totalCount">15</div>
+        </div>
+      </div>
+
+      <div class="password-input-group">
+        <input type="text" id="newPassword" placeholder="Digite uma nova senha..." maxlength="100">
+        <button onclick="addPassword()">➕ Adicionar</button>
+      </div>
+
+      <div class="passwords-list" id="passwordsList">
+        <p style="text-align: center; color: #999;">Carregando senhas...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const form = document.getElementById('checkerForm');
+    const batchForm = document.getElementById('batchForm');
+    const loading = document.getElementById('loading');
+    const alert = document.getElementById('alert');
+    const resultsDiv = document.getElementById('results');
+    const resultsList = document.getElementById('resultsList');
+
+    // Tab switching
+    function switchTab(tab) {
+      const individualContent = document.getElementById('tabIndividualContent');
+      const batchContent = document.getElementById('tabBatchContent');
+      const tabIndividualBtn = document.getElementById('tabIndividual');
+      const tabBatchBtn = document.getElementById('tabBatch');
+
+      if (tab === 'individual') {
+        individualContent.style.display = 'block';
+        batchContent.style.display = 'none';
+        tabIndividualBtn.classList.add('active');
+        tabBatchBtn.classList.remove('active');
+      } else {
+        individualContent.style.display = 'none';
+        batchContent.style.display = 'block';
+        tabIndividualBtn.classList.remove('active');
+        tabBatchBtn.classList.add('active');
+      }
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const provider = document.getElementById('provider').value;
+
+      loading.style.display = 'block';
+      alert.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, provider })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(`✅ Sucesso! Senha encontrada: ${data.result.password}`, 'success');
+        } else {
+          let msg = `${data.message}`;
+          if (data.totalSenhasTentadas) {
+            msg += ` (${data.totalSenhasTentadas} senha(s) testada(s))`;
+          }
+          if (data.dica) {
+            msg += `\n\n💡 Dica: ${data.dica}`;
+          }
+          showAlert(msg, 'info');
+          console.log('Resposta completa:', data);
+        }
+
+        loadResults();
+      } catch (error) {
+        showAlert(`⚠️ Erro na requisição: ${error.message}`, 'error');
+      } finally {
+        loading.style.display = 'none';
+        form.reset();
+      }
+    });
+
+    function showAlert(message, type) {
+      alert.textContent = message;
+      alert.className = `alert ${type}`;
+    }
+
+    async function loadResults() {
+      try {
+        const response = await fetch('/api/results');
+        const results = await response.json();
+
+        if (results.length === 0) {
+          resultsList.innerHTML = '<div class="empty-state">Nenhum resultado ainda. Comece testando!</div>';
+          resultsDiv.style.display = 'block';
+          return;
+        }
+
+        resultsList.innerHTML = results
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .map(r => `
+            <div class="result-item ${r.status === 'SUCCESS' ? 'success' : ''}">
+              <div class="result-header">
+                <span class="result-email">${r.email}</span>
+                ${r.status === 'SUCCESS' ? '<span class="result-status">✅ SUCESSO</span>' : ''}
+              </div>
+              ${r.status === 'SUCCESS' ? `<div class="result-password">Senha: ${r.password}</div>` : ''}
+              <div class="result-date">${new Date(r.timestamp).toLocaleString('pt-BR')}</div>
+              <button onclick="removeResult('${r.email}')" style="margin-top: 10px; padding: 8px 12px; font-size: 12px; background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid #fca5a5;">🗑️ Remover</button>
+            </div>
+          `).join('');
+
+        resultsDiv.style.display = 'block';
+      } catch (error) {
+        showAlert(`⚠️ Erro ao carregar resultados: ${error.message}`, 'error');
+      }
+    }
+
+    async function clearResults() {
+      if (!confirm('⚠️ Tem certeza que deseja limpar TODO o histórico?')) return;
+      if (!confirm('Segunda confirmação: Deseja realmente apagar TUDO?')) return;
+
+      try {
+        const response = await fetch('/api/clear-all', { method: 'POST' });
+        const data = await response.json();
+        showAlert('✅ ' + data.message, 'success');
+        loadResults();
+      } catch (error) {
+        showAlert(`⚠️ Erro ao limpar: ${error.message}`, 'error');
+      }
+    }
+
+    async function removeResult(email) {
+      if (!confirm(`Deseja remover todos os resultados do email: ${email}?`)) return;
+
+      try {
+        const response = await fetch(`/api/results/${encodeURIComponent(email)}`, { method: 'DELETE' });
+        const data = await response.json();
+        showAlert('✅ ' + data.message, 'success');
+        loadResults();
+      } catch (error) {
+        showAlert(`⚠️ Erro ao remover: ${error.message}`, 'error');
+      }
+    }
+
+    async function importEmailsFile() {
+      const fileInput = document.getElementById('emailFile');
+      const file = fileInput.files[0];
+
+      if (!file) {
+        showAlert('⚠️ Escolha um arquivo!', 'error');
+        return;
+      }
+
+      try {
+        const text = await file.text();
+        let emails = [];
+
+        if (file.name.endsWith('.csv')) {
+          emails = text.split('\n').map(line => {
+            const parts = line.split(',');
+            return parts[0].trim();
+          }).filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+        } else {
+          emails = text.split('\n').map(e => e.trim()).filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+        }
+
+        if (emails.length === 0) {
+          showAlert('⚠️ Nenhum email válido encontrado no arquivo', 'error');
+          return;
+        }
+
+        const textarea = document.getElementById('emails');
+        textarea.value = emails.join('\n');
+        fileInput.value = '';
+        showAlert(`✅ ${emails.length} email(s) importado(s) com sucesso!`, 'success');
+      } catch (error) {
+        showAlert(`⚠️ Erro ao importar: ${error.message}`, 'error');
+      }
+    }
+
+    // Batch form handler
+    batchForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const emailsText = document.getElementById('emails').value.trim();
+      const password = document.getElementById('batchPasswordSelect').value;
+      const provider = document.getElementById('batchProvider').value;
+
+      if (!emailsText || !password) {
+        showAlert('⚠️ Preencha emails e escolha uma senha!', 'error');
+        return;
+      }
+
+      const emails = emailsText.split('\n').map(e => e.trim()).filter(e => e);
+
+      if (emails.length === 0) {
+        showAlert('⚠️ Nenhum email válido!', 'error');
+        return;
+      }
+
+      // Mostrar progresso
+      const progressDiv = document.getElementById('batchProgress');
+      progressDiv.style.display = 'block';
+      loading.style.display = 'none';
+
+      let successCount = 0;
+      let failCount = 0;
+
+      // Testar todos em paralelo (máximo 5 simultâneas)
+      const maxConcurrent = 5;
+      const results = [];
+
+      for (let i = 0; i < emails.length; i += maxConcurrent) {
+        const batch = emails.slice(i, i + maxConcurrent);
+        const promises = batch.map(async (email, idx) => {
+          try {
+            const response = await fetch('/api/check', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ email, provider })
+            });
+
+            const data = await response.json();
+            const success = data.success;
+
+            // Atualizar barra de progresso
+            const current = results.length + 1;
+            document.getElementById('progressText').textContent = `${current}/${emails.length}`;
+            document.getElementById('progressBar').style.width = `${(current / emails.length) * 100}%`;
+
+            if (success) {
+              successCount++;
+            } else {
+              failCount++;
+            }
+
+            results.push({ email, success });
+            return { email, success };
+          } catch (error) {
+            failCount++;
+            results.push({ email, success: false });
+            return { email, success: false };
+          }
+        });
+
+        await Promise.all(promises);
+      }
+
+      showAlert(`✅ Teste completo! ${successCount} sucesso(s) | ${failCount} erro(s)`, 'success');
+      loadResults();
+      progressDiv.style.display = 'none';
+    });
+
+    // Carregar resultados ao iniciar
+    loadResults();
+    loadPasswords();
+
+    // Permitir Enter no input de senha
+    document.getElementById('newPassword').addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') addPassword();
+    });
+
+    async function loadPasswords() {
+      try {
+        const response = await fetch('/api/passwords');
+        const data = await response.json();
+
+        document.getElementById('defaultCount').textContent = data.default.length;
+        document.getElementById('totalCount').textContent = data.total;
+
+        let html = '';
+
+        // Senhas padrão (não removíveis)
+        data.default.forEach((pwd) => {
+          html += `
+            <span class="password-tag default" title="Senha padrão">
+              ${pwd}
+            </span>
+          `;
+        });
+
+        // Senhas customizadas (removíveis)
+        data.custom.forEach((pwd, index) => {
+          html += `
+            <span class="password-tag">
+              ${pwd}
+              <button onclick="removePassword(${index})" title="Remover">✕</button>
+            </span>
+          `;
+        });
+
+        if (data.custom.length === 0 && data.default.length > 0) {
+          document.getElementById('passwordsList').innerHTML = html || '<p style="text-align: center; color: #999;">Usando senhas padrão</p>';
+        } else {
+          document.getElementById('passwordsList').innerHTML = html;
+        }
+
+        // Preencher dropdown de senhas para teste em massa
+        const select = document.getElementById('batchPasswordSelect');
+        if (select) {
+          select.innerHTML = '<option value="">-- Selecione uma senha --</option>';
+
+          // Adicionar senhas customizadas
+          if (data.custom && data.custom.length > 0) {
+            data.custom.forEach((pwd) => {
+              const option = document.createElement('option');
+              option.value = pwd;
+              option.textContent = `📌 ${pwd}`;
+              select.appendChild(option);
+            });
+
+            // Selecionar a primeira automaticamente
+            select.value = data.custom[0];
+          }
+
+          // Adicionar senhas padrão se existirem
+          if (data.default && data.default.length > 0) {
+            data.default.forEach((pwd) => {
+              const option = document.createElement('option');
+              option.value = pwd;
+              option.textContent = `⭐ ${pwd}`;
+              select.appendChild(option);
+            });
+          }
+        }
+      } catch (error) {
+        showAlert(`⚠️ Erro ao carregar senhas: ${error.message}`, 'error');
+      }
+    }
+
+    async function addPassword() {
+      const input = document.getElementById('newPassword');
+      const password = input.value.trim();
+
+      if (!password) {
+        showAlert('⚠️ Digite uma senha!', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/passwords', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ password })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert(`✅ Senha "${password}" adicionada!`, 'success');
+          input.value = '';
+          loadPasswords();
+        } else {
+          showAlert(`⚠️ ${data.error}`, 'error');
+        }
+      } catch (error) {
+        showAlert(`⚠️ Erro ao adicionar senha: ${error.message}`, 'error');
+      }
+    }
+
+    async function removePassword(index) {
+      if (!confirm('Tem certeza que deseja remover esta senha?')) return;
+
+      try {
+        const response = await fetch(`/api/passwords/${index}`, {
+          method: 'DELETE'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+          showAlert(`✅ Senha removida!`, 'success');
+          loadPasswords();
+        } else {
+          showAlert(`⚠️ Erro ao remover: ${data.error}`, 'error');
+        }
+      } catch (error) {
+        showAlert(`⚠️ Erro: ${error.message}`, 'error');
+      }
+    }
+
+    async function diagnose() {
+      const email = document.getElementById('email').value;
+      const provider = document.getElementById('provider').value;
+
+      if (!email) {
+        showAlert('⚠️ Digite um email!', 'error');
+        return;
+      }
+
+      // Pedir senha manualmente para diagnóstico
+      const password = prompt('Digite a senha para diagnóstico (não será salva):');
+      if (!password) return;
+
+      loading.style.display = 'block';
+      alert.style.display = 'none';
+
+      try {
+        const response = await fetch('/api/diagnose', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email, password, provider })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+          showAlert(`✅ ${data.message}\nAs credenciais estão funcionando!`, 'success');
+        } else {
+          let msg = `❌ ${data.message}\n\n${data.error}\n\n${data.solucao}`;
+          showAlert(msg, 'error');
+          console.log('Diagnóstico:', data);
+        }
+      } catch (error) {
+        showAlert(`⚠️ Erro no diagnóstico: ${error.message}`, 'error');
+      } finally {
+        loading.style.display = 'none';
+      }
+    }
+  </script>
+</body>
+</html>
