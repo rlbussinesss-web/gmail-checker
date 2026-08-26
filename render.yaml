@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: gmail-checker
+    env: node
+    plan: free
+    buildCommand: npm install && npx playwright install chromium && npx playwright install-deps
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production

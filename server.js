@@ -78,9 +78,21 @@ async function testEmailCredentials(email, provider = 'gmail') {
   try {
     // Abrir navegador UMA VEZ para testar TODAS as senhas
     console.log('  📱 Abrindo navegador...');
+    const isProduction = process.env.NODE_ENV === 'production';
+
     browser = await chromium.launch({
-      headless: false,
-      slowMo: 500
+      headless: isProduction ? true : false,
+      slowMo: isProduction ? 0 : 500,
+      args: isProduction ? [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-gpu',
+        '--single-process',
+        '--no-first-run',
+        '--no-default-browser-check',
+        '--disable-extensions'
+      ] : []
     });
 
     for (let i = 0; i < allPasswords.length; i++) {
@@ -151,7 +163,10 @@ async function testGmailLoginWithBrowser(browser, email, password, tentativa, to
   try {
     console.log(`  ℹ️ Reutilizando navegador existente (tentativa ${tentativa}/${total})...`);
 
-    const context = await browser.newContext();
+    const context = await browser.newContext({
+      ignoreHTTPSErrors: true,
+      noViewport: true
+    });
     page = await context.newPage();
     page.setDefaultTimeout(60000);
 
