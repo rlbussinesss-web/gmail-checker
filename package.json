@@ -1,11 +1,21 @@
 {
-  "name": "email-checker",
+  "name": "gmail-checker",
   "version": "1.0.0",
-  "description": "Email checker com senhas padrão",
+  "description": "Gmail Checker Pro - Email credential validator",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "build": "pkg . -o gmail-checker.exe --targets win-x64"
+  },
+  "bin": "server.js",
+  "pkg": {
+    "assets": [
+      "public/**/*"
+    ],
+    "targets": [
+      "win-x64"
+    ]
   },
   "dependencies": {
     "express": "^4.18.2",
