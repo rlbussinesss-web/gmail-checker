@@ -1,0 +1,99 @@
+╔════════════════════════════════════════════════════════════╗
+║    🌐 COMO COMPARTILHAR SEU CHECKER COM OUTRAS PESSOAS     ║
+╚════════════════════════════════════════════════════════════╝
+
+⚡ PASSO A PASSO
+─────────────────────────────────────────────────────────────
+
+1️⃣ INICIAR O SERVIDOR
+   └─ Clique duplo em: INICIAR.bat
+   └─ Aguarde aparecer: "✅ Servidor iniciando em http://localhost:3000"
+   └─ NÃO feche essa janela
+
+2️⃣ EM OUTRO PowerShell/CMD, CRIAR LINK PÚBLICO
+   └─ Clique duplo em: COMPARTILHAR.bat
+   └─ Aguarde aparecer algo como:
+
+      "your url is: https://abc-123-def.loca.lt"
+
+3️⃣ COPIAR E COMPARTILHAR
+   └─ Copie a URL que apareceu (exemplo acima)
+   └─ Envie para seu amigo via WhatsApp, Email, etc
+   └─ Ele acessa direto no navegador!
+
+4️⃣ SEU AMIGO USA
+   └─ Clica no link
+   └─ Acessa http://localhost:3000 de qualquer lugar
+   └─ Testa emails normalmente
+   └─ Vê resultados em tempo real
+
+
+🔗 COMO FUNCIONA
+─────────────────────────────────────────────────────────────
+
+[Seu PC] -----(localhost:3000)-----+
+                                    |
+                      Localtunnel (túnel automático)
+                                    |
+                                    +---- [Amigo]
+                                          Acessa via HTTPS
+
+
+⚠️ IMPORTANTE
+─────────────────────────────────────────────────────────────
+
+✓ Você PRECISA manter AMBAS as janelas abertas:
+  - INICIAR.bat (servidor rodando)
+  - COMPARTILHAR.bat (túnel ativo)
+
+✓ URL muda cada vez que reinicia COMPARTILHAR.bat
+  → Se desconectar, executa novamente e pega nova URL
+
+✓ Seu amigo consegue acessar enquanto o link está ativo
+  → Se você fechar o COMPARTILHAR.bat, o link cai
+
+✓ Seguro e privado
+  → Apenas quem tem a URL consegue acessar
+  → Sem instalar nada no PC do seu amigo
+
+
+❌ SE DER ERRO
+─────────────────────────────────────────────────────────────
+
+"Servidor não está rodando"
+→ Execute INICIAR.bat PRIMEIRO
+
+"Conexão recusada"
+→ Certifique-se que INICIAR.bat está aberto
+
+"Porta 3000 já em uso"
+→ Feche outros programas que usam porta 3000
+
+
+📊 DADOS E PRIVACIDADE
+─────────────────────────────────────────────────────────────
+
+⚠️  CUIDADO: Qualquer um com a URL consegue:
+   - Ver todos os resultados
+   - Adicionar senhas
+   - Exportar dados
+
+✓ Compartilhe apenas com pessoas confiáveis
+✓ Mude senhas sensíveis após uso
+✓ Feche o link quando terminar
+
+
+🛑 PARAR DE COMPARTILHAR
+─────────────────────────────────────────────────────────────
+
+1. Feche COMPARTILHAR.bat (o link cai imediatamente)
+2. Seu amigo não consegue mais acessar
+3. Você continua usando localmente
+
+Ou se quiser parar TUDO:
+- Feche INICIAR.bat também
+
+
+═════════════════════════════════════════════════════════════
+Made with ❤️ by Claude Code
+═════════════════════════════════════════════════════════════
