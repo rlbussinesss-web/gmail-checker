@@ -465,7 +465,10 @@
 
       <!-- Results -->
       <div id="results-section" class="results-section">
-        <h2 style="margin-bottom: 20px; color: #e0e0e0;">📊 Resultados</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h2 style="color: #e0e0e0; margin: 0;">📊 Resultados</h2>
+          <button type="button" class="btn" style="width: auto; padding: 10px 20px; background: rgba(239, 68, 68, 0.15); color: #fca5a5; font-size: 12px;" onclick="clearAllData()">🗑️ Limpar Histórico</button>
+        </div>
         <div id="resultsList"></div>
       </div>
 
@@ -670,6 +673,24 @@
 
     async function diagnose() {
       showAlert('Diagnóstico em desenvolvimento');
+    }
+
+    async function clearAllData() {
+      if (!confirm('⚠️ Tem certeza que deseja apagar TODO o histórico?')) return;
+      if (!confirm('Segunda confirmação: Deseja realmente apagar TUDO?')) return;
+
+      document.getElementById('loading').style.display = 'block';
+
+      try {
+        const response = await fetch('/api/clear-all', { method: 'POST' });
+        const data = await response.json();
+        showAlert('✅ ' + data.message, 'success');
+        loadResults();
+      } catch (error) {
+        showAlert('❌ Erro: ' + error.message, 'error');
+      } finally {
+        document.getElementById('loading').style.display = 'none';
+      }
     }
 
     // Carregar dados ao iniciar
