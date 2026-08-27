@@ -399,8 +399,12 @@ app.get('/api/stats', (req, res) => {
     const emailsSucesso = new Set(sucessos.map(r => r.email));
     const emailsErro = new Set(erros.map(r => r.email));
 
-    // Senhas encontradas
-    const senhasEncontradas = sucessos.map(r => ({ email: r.email, senha: r.password }));
+    // Senhas encontradas (sem duplicatas)
+    const senhasEncontradas = Array.from(
+      new Map(
+        sucessos.map(r => [`${r.email}|${r.password}`, { email: r.email, senha: r.password }])
+      ).values()
+    );
 
     // Emails com erro e tentativas
     const emailsComErro = {};
