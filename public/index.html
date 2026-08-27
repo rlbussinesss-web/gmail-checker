@@ -612,7 +612,60 @@
 
     async function testBatch(e) {
       e.preventDefault();
-      showAlert('Funcionando em breve!');
+
+      const emailsText = document.getElementById('emails').value.trim();
+      const password = document.getElementById('batchPasswordSelect').value;
+      const provider = document.getElementById('batchProvider').value;
+
+      if (!emailsText || !password) {
+        showAlert('Preencha emails e escolha uma senha!', 'error');
+        return;
+      }
+
+      const emails = emailsText.split('\n').map(e => e.trim()).filter(e => e && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e));
+
+      if (emails.length === 0) {
+        showAlert('Nenhum email válido encontrado!', 'error');
+        return;
+      }
+
+      document.getElementById('loading').style.display = 'block';
+      showAlert(`⏳ Testando ${emails.length} email(s)...`);
+
+      let successCount = 0;
+      let errorCount = 0;
+      const results = [];
+
+      // Processar em paralelo (5 de uma vez)
+      const batchSize = 5;
+      for (let i = 0; i < emails.length; i += batchSize) {
+        const batch = emails.slice(i, i + batchSize);
+        const promises = batch.map(email =>
+          fetch('/api/check', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, provider })
+          })
+            .then(res => res.json())
+            .then(data => {
+              if (data.success) successCount++;
+              else errorCount++;
+              results.push({ email, status: data.success ? '✅' : '❌', message: data.message });
+              return data;
+            })
+            .catch(err => {
+              errorCount++;
+              results.push({ email, status: '❌', message: 'Erro de conexão' });
+            })
+        );
+
+        await Promise.all(promises);
+      }
+
+      document.getElementById('loading').style.display = 'none';
+      loadResults();
+
+      showAlert(`✅ Teste concluído: ${successCount} sucesso(s), ${errorCount} erro(s)`, 'success');
     }
 
     async function diagnose() {
