@@ -243,64 +243,90 @@ async function testGmailLoginWithBrowser(browser, email, password, tentativa, to
       throw new Error('Senha - ' + passError.message);
     }
 
-    console.log('  ⏳ Verificando resultado...');
+    console.log('  🧠 Detectando resposta inteligentemente...');
 
     const startCheck = Date.now();
-    const maxWait = 20000;
+    const maxWait = 25000;
     let foundError = false;
 
     try {
       while (Date.now() - startCheck < maxWait) {
-        // PRIMEIRO: Verificar se há erro de senha na página
+        const currentUrl = page.url();
+        let screenType = 'desconhecida';
+
+        // Detectar tipo de tela
         try {
-          const hasError = await page.evaluate(() => {
-            const pageText = document.body.innerText.toLowerCase();
-            const hasErrorMsg = pageText.includes('senha incorreta') ||
-                   pageText.includes('wrong password') ||
-                   pageText.includes('invalid password');
-            return hasErrorMsg;
+          const pageAnalysis = await page.evaluate(() => {
+            const text = document.body.innerText.toLowerCase();
+            const html = document.documentElement.innerHTML.toLowerCase();
+
+            return {
+              hasPasswordError: text.includes('senha incorreta') ||
+                              text.includes('wrong password') ||
+                              text.includes('invalid password') ||
+                              text.includes('password incorrect'),
+              has2FA: text.includes('verificação') ||
+                     text.includes('código') ||
+                     text.includes('verify') ||
+                     text.includes('authentication') ||
+                     text.includes('2fa') ||
+                     html.includes('backup code'),
+              hasCaptcha: text.includes('captcha') ||
+                         text.includes('não sou um robô') ||
+                         text.includes('i\'m not a robot'),
+              hasSuccessIndicators: html.includes('inbox') ||
+                                   html.includes('gmail') && text.includes('enviar'),
+              pageText: text.substring(0, 500)
+            };
           });
 
-          if (hasError) {
-            console.log('  ❌ ERRO DE SENHA CONFIRMADO!');
-            foundError = true;
+          // Analisar resultado
+          if (pageAnalysis.hasPasswordError) {
+            console.log('  ❌ TELA DETECTADA: Erro de Senha');
+            console.log('  🔍 Mensagem: Senha incorreta detectada');
             throw new Error('Senha incorreta');
           }
+
+          if (pageAnalysis.has2FA) {
+            console.log('  ⚠️  TELA DETECTADA: Verificação 2FA/Segurança');
+            console.log('  🔍 Precisa de código de verificação - considerando como sucesso parcial');
+            return { success: true, note: '2FA_REQUIRED' };
+          }
+
+          if (pageAnalysis.hasCaptcha) {
+            console.log('  ⚠️  TELA DETECTADA: Captcha/Verificação de Humano');
+            console.log('  🔍 Google solicitando verificação - considerar suspeito');
+            throw new Error('Captcha detectado - verificação humana necessária');
+          }
+
+          if (pageAnalysis.hasSuccessIndicators) {
+            console.log('  ✅ TELA DETECTADA: Inbox/Sucesso');
+            return { success: true };
+          }
         } catch (evalError) {
-          // Se erro é por contexto destruído = sucesso (navegou)
+          // Contexto destruído = navegação bem-sucedida
           if (evalError.message &&
               (evalError.message.includes('Execution context') ||
                evalError.message.includes('was not bound'))) {
-            if (!foundError) {
-              console.log('  ✅ Contexto destruído = Sucesso!');
-              return { success: true };
-            }
-          } else if (evalError.message === 'Senha incorreta') {
-            // Erro de senha real
+            console.log('  ✅ DETECTADO: Página foi destruída (redirecionamento bem-sucedido)');
+            return { success: true };
+          } else if (evalError.message && evalError.message.includes('Senha incorreta')) {
             throw evalError;
           }
         }
 
-        // SEGUNDO: Verificar URL
-        const currentUrl = page.url();
-
-        // Se ainda em signin, continua verificando
-        if (currentUrl.includes('signin') || currentUrl.includes('identifier')) {
-          await page.waitForTimeout(500);
-          continue;
-        }
-
-        // Se saiu de signin e sem erro = SUCESSO
-        if (!foundError) {
-          console.log('  ✅ Saiu de signin = Sucesso!');
+        // Verificar mudança de URL
+        if (!currentUrl.includes('signin') && !currentUrl.includes('identifier') && !currentUrl.includes('accounts')) {
+          console.log(`  ✅ DETECTADO: URL mudou para ${currentUrl.split('/').slice(0, 3).join('/')}`);
           return { success: true };
         }
 
-        await page.waitForTimeout(300);
+        console.log('  ⏳ Aguardando resposta...');
+        await page.waitForTimeout(800);
       }
 
-      console.log('  ❌ Timeout');
-      throw new Error('Timeout na verificação');
+      console.log('  ❌ TIMEOUT: Sem resposta após 25 segundos');
+      throw new Error('Timeout - sem resposta do servidor');
 
     } catch (checkError) {
       console.log('  ❌ ' + checkError.message);
